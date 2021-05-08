@@ -1,4 +1,6 @@
 /**
+ * spotify-web-api-node/examples/tutorial/00-get-access-token.js /
+ * 
  * This example is using the Authorization Code flow.
  *
  * In root directory run
@@ -13,11 +15,14 @@
  *
  *  and visit <http://localhost:8888/login> in your Browser.
  */
- const SpotifyWebApi = require('spotify-web-api-node');
- const express = require('./node_modules/express');
- require('dotenv').config();
 
- const scopes = [
+// THIS IS THE SERVER(index.js)
+const SpotifyWebApi = require('spotify-web-api-node');
+const express = require('./node_modules/express');
+require('dotenv').config();
+const Datastore = require('nedb');
+
+const scopes = [
    'ugc-image-upload',
    'user-read-playback-state',
    'user-modify-playback-state',
@@ -37,7 +42,7 @@
    'user-read-recently-played',
    'user-follow-read',
    'user-follow-modify'
- ];
+];
  
  const spotifyApi = new SpotifyWebApi({
    redirectUri: 'http://localhost:8888/callback',
@@ -100,3 +105,7 @@
      'HTTP Server up. Now go to http://localhost:8888/login in your browser.'
    )
  );
+
+const database = new Datastore('database.db');
+database.load();
+
