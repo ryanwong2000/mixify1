@@ -1,0 +1,28 @@
+example of data response from spotifyApi.authorizationCodeGrant(code):
+{
+  body: {
+    access_token: 'BQDp8T-8EomMuqYriJ48-pUpBCY8Ss_mr0cDd56IJg4QVxICogobm8XExtDXz87qytDMJPI7VQsjyHTqvQUYyuIHtgAGwAj_tGO_gfmPYlyhLItwyKG9oxzij7tBspDIQ3ttayeWbpNvKGpn9jywm9ktfGk0H3hzDZVqXS26VScw7A1I_fTTyAhtuHK5CGXtK_h7uHl2QaGl_rWsF7wrBWyAUY6wGtfIec55EfGQnPbcctNMYk53ojB0Jpwsi0-mlCFx6utyyTesVrlLNaCqJlDQA6m1ozF73zc',
+    token_type: 'Bearer',
+    expires_in: 3600,
+    refresh_token: 'AQDzNSO8ZRg699JgEWHCyxlnnVJ6vRuMTwoaEa5eCwt85XzTHAxEDQifzoEbCnVRS7YLWfuQIIe5Lvdl7P_oPThQPktX5lEDb4YvU5lOx594fDg84jYhY2HUpAssQavnRRk',
+    scope: 'playlist-read-private playlist-read-collaborative ugc-image-upload user-follow-read playlist-modify-private user-read-email user-read-private streaming app-remote-control user-modify-playback-state user-follow-modify user-library-read user-library-modify playlist-modify-public user-read-playback-state user-read-currently-playing user-read-recently-played user-read-playback-position user-top-read'
+  },
+  headers: {
+    date: 'Sun, 09 May 2021 17:25:07 GMT',
+    'content-type': 'application/json',
+    vary: 'Accept-Encoding',
+    'set-cookie': [
+      '__Host-device_id=AQCFT8GO0g3wkhwclY92KandnexH6ObIZuPI4sFHFNmfz_Ltbt3oDkUP95cbzcNQpMATkJDL9z09hRmFHT4yOw6wM1SRT7IR3Vk;Version=1;Path=/;Max-Age=2147483647;Secure;HttpOnly;SameSite=Lax'
+    ],
+    'sp-trace-id': '8fbe1fba3ab5fc84',
+    'content-encoding': 'gzip',
+    'strict-transport-security': 'max-age=31536000',
+    'x-content-type-options': 'nosniff',
+    server: 'envoy',
+    via: 'HTTP/2 edgeproxy, 1.1 google',
+    'alt-svc': 'clear',
+    connection: 'close',
+    'transfer-encoding': 'chunked'
+  },
+  statusCode: 200
+}

@@ -49,8 +49,8 @@ async function getPlaylistTracks(playlistId, playlistName) {
 
 //   console.log('The playlist contains these tracks', data.body);
 //   console.log('The playlist contains these tracks: ', data.body.items[0].track);
-    console.log("'" + playlistName + "'" + ' contains these tracks:');
-    let tracks = [];
+  console.log("'" + playlistName + "'" + ' contains these tracks:');
+  let tracks = [];
 
   for (let track_obj of data.body.items) {
     const track = track_obj.track
