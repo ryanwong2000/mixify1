@@ -44,7 +44,7 @@ if (process.env.PORT === "undefined") {
   uri = "https://mixify1.herokuapp.com/callback";
 }
 const spotifyApi = new SpotifyWebApi({
-  redirectUri: `http://localhost:${port}/callback`,
+  redirectUri: uri,
   clientId: "92fef82c4b9f4b3ca1b3eb08b0001568",
   clientSecret: process.env.CLIENT_SECRET,
 });
