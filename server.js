@@ -29,20 +29,19 @@ const scopes = [
 const app = express();
 const port = process.env.PORT || 8888;
 console.log("you looking for a boyfriend?");
-app.listen(port, () =>
-  console.log(
-    `HTTP Server up. Now go to http://localhost:${port}/login in your browser.`
-  )
-);
-//serve static pages in public folder
-app.use(express.static("public"));
-app.use(express.json());
-
+var uri;
 if (process.env.PORT === "undefined") {
   uri = "http://localhost:8888/callback";
 } else {
   uri = "https://mixify1.herokuapp.com/callback";
 }
+app.listen(port, () =>
+  console.log(`HTTP Server up. Now go to ${uri} in your browser.`)
+);
+//serve static pages in public folder
+app.use(express.static("public"));
+app.use(express.json());
+
 const spotifyApi = new SpotifyWebApi({
   redirectUri: uri,
   clientId: "92fef82c4b9f4b3ca1b3eb08b0001568",
