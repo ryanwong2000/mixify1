@@ -2,6 +2,7 @@ const SpotifyWebApi = require("spotify-web-api-node");
 const express = require("./node_modules/express");
 require("dotenv").config();
 const Datastore = require("nedb");
+const cron = require("cron").CronJob;
 
 const scopes = [
   "ugc-image-upload",
@@ -101,35 +102,74 @@ app.get("/callback", async (req, res) => {
   }
 
   try {
-    console.log("getting top artists...");
-    const artistData = await spotifyApi.getMyTopArtists({
-      time_range: "short_term",
-      limit: 5,
-    });
-
-    let ids = {};
-    let index = 1;
-    console.log("my top tracks are:");
-    for (artistObj of artistData.body.items) {
-      let id = artistObj.id;
-      let name = artistObj.name;
-      console.log(`${name} id: ${id}`);
-      ids[index++] = id;
-    }
-
-    let store = {
-      date: new Date().toLocaleString("en-US", {
-        timeZone: "America/New_York",
-      }),
-      type: "artists",
-      items: ids,
-    };
-    console.log("+++++++++++++++++++++++++++++++++++");
-    console.log(store);
-    database.insert(store);
+    getTopArtistsShort("short_term");
   } catch (error) {
     console.error("Error getting top artists", error);
   }
+  try {
+    getTopTracksShort("short_term");
+  } catch (error) {
+    console.error("Error getting top tracks", error);
+  }
 });
+
+async function getTopArtistsShort(term) {
+  console.log("getting top artists...");
+  const artistData = await spotifyApi.getMyTopArtists({
+    time_range: term,
+    limit: 50,
+  });
+
+  let ids = {};
+  let index = 1;
+  console.log("my top artists are:");
+  for (artistObj of artistData.body.items) {
+    let id = artistObj.id;
+    let name = artistObj.name;
+    console.log(`${name} id: ${id}`);
+    ids[index++] = id;
+  }
+  //create obj to add to database
+  let store = {
+    type: "artists",
+    date: new Date().toLocaleString("en-US", {
+      timeZone: "America/New_York",
+    }),
+
+    items: ids,
+  };
+  console.log("+++++++++++++++++++++++++++++++++++");
+  console.log(store);
+  database.insert(store);
+}
+async function getTopTracksShort(term) {
+  console.log("getting top tracks...");
+  const trackData = await spotifyApi.getMyTopTracks({
+    time_range: term,
+    limit: 50,
+  });
+
+  let ids = {};
+  let index = 1;
+  console.log("my top tracks are:");
+  for (trackObj of trackData.body.items) {
+    let id = trackObj.id;
+    let name = trackObj.name;
+    console.log(`${name} id: ${id}`);
+    ids[index++] = id;
+  }
+  //create obj to add to database
+  let store = {
+    type: "tracks",
+    date: new Date().toLocaleString("en-US", {
+      timeZone: "America/New_York",
+    }),
+
+    items: ids,
+  };
+  console.log("+++++++++++++++++++++++++++++++++++");
+  console.log(store);
+  database.insert(store);
+}
 
 console.log("Give me time you know im gonna be that");
