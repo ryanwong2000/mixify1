@@ -27,7 +27,7 @@ const scopes = [
   "user-follow-modify",
 ];
 const app = express();
-const port = 8888;
+const port = process.env.PORT || 8888;
 console.log("you looking for a boyfriend?");
 app.listen(port, () =>
   console.log(
