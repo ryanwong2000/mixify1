@@ -2,7 +2,8 @@ const SpotifyWebApi = require("spotify-web-api-node");
 const express = require("./node_modules/express");
 require("dotenv").config();
 const Datastore = require("nedb");
-const cron = require("cron").CronJob;
+// const CronJob = require("cron").CronJob;
+const cron = require("node-cron");
 
 const scopes = [
   "ugc-image-upload",
@@ -101,13 +102,18 @@ app.get("/callback", async (req, res) => {
     res.send(`Error getting Tokens: ${error}`);
   }
 
+  //SET TO UPDATE EVERY MONDAY AT 12:12PM
   try {
-    getTopArtistsShort("short_term");
+    cron.schedule("12 12 * * mon", () => {
+      getTopArtistsShort("short_term"), { timezone: "America/New_York" };
+    });
   } catch (error) {
     console.error("Error getting top artists", error);
   }
   try {
-    getTopTracksShort("short_term");
+    cron.schedule("12 12 * * mon", () => {
+      getTopTracksShort("short_term"), { timezone: "America/New_York" };
+    });
   } catch (error) {
     console.error("Error getting top tracks", error);
   }
@@ -117,7 +123,7 @@ async function getTopArtistsShort(term) {
   console.log("getting top artists...");
   const artistData = await spotifyApi.getMyTopArtists({
     time_range: term,
-    limit: 50,
+    limit: 5,
   });
 
   let ids = {};
@@ -146,7 +152,7 @@ async function getTopTracksShort(term) {
   console.log("getting top tracks...");
   const trackData = await spotifyApi.getMyTopTracks({
     time_range: term,
-    limit: 50,
+    limit: 5,
   });
 
   let ids = {};
