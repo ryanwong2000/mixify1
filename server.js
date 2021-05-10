@@ -38,6 +38,11 @@ app.listen(port, () =>
 app.use(express.static("public"));
 app.use(express.json());
 
+if (process.env.PORT === "undefined") {
+  uri = "http://localhost:8888/callback";
+} else {
+  uri = "https://mixify1.herokuapp.com/callback";
+}
 const spotifyApi = new SpotifyWebApi({
   redirectUri: `http://localhost:${port}/callback`,
   clientId: "92fef82c4b9f4b3ca1b3eb08b0001568",
