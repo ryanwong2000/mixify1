@@ -31,6 +31,8 @@ const port = process.env.PORT || 8888;
 console.log('you looking for a boyfriend?');
 var uri;
 if (process.env.PORT === 'undefined') {
+  console.log('env = ' + process.env.PORT);
+
   uri = 'http://localhost:8888/callback';
 } else {
   uri = 'https://mixify1.herokuapp.com/callback';
