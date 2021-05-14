@@ -61,6 +61,9 @@ console.log('I see that');
 
 //AUTH STUFF
 app.get('/callback', async (req, res) => {
+  console.log(req);
+  console.log(req.query);
+
   //rewrite w async/await bc i like it better
   const error = req.query.error;
   const code = req.query.code;
@@ -107,29 +110,38 @@ app.get('/callback', async (req, res) => {
     res.send(`Error getting Tokens: ${error}`);
   }
 
+  // getTopArtistsShort('short_term');
+  // getTopTracksShort('short_term');
+
   //SET TO UPDATE EVERY MONDAY AT 12:12PM
-  try {
-    cron.schedule('12 12 * * mon', () => {
-      getTopArtistsShort('short_term'), { timezone: 'America/New_York' };
-    });
-  } catch (error) {
-    console.error('Error getting top artists', error);
-  }
-  try {
-    cron.schedule('12 12 * * mon', () => {
-      getTopTracksShort('short_term'), { timezone: 'America/New_York' };
-    });
-  } catch (error) {
-    console.error('Error getting top tracks', error);
-  }
+  // try {
+  //   cron.schedule('12 12 * * mon', () => {
+  //     getTopArtistsShort('short_term'), { timezone: 'America/New_York' };
+  //   });
+  // } catch (error) {
+  //   console.error('Error getting top artists', error);
+  // }
+  // try {
+  //   cron.schedule('12 12 * * mon', () => {
+  //     getTopTracksShort('short_term'), { timezone: 'America/New_York' };
+  //   });
+  // } catch (error) {
+  //   console.error('Error getting top tracks', error);
+  // }
+
+  res.redirect('/login');
 });
 
 async function getTopArtistsShort(term) {
   console.log('getting top artists...');
-  const artistData = await spotifyApi.getMyTopArtists({
-    time_range: term,
-    limit: 5
-  });
+  const artistData = await spotifyApi
+    .getMyTopArtists({
+      time_range: term,
+      limit: 50
+    })
+    .catch((error) => {
+      console.log('error getting top artists', error);
+    });
 
   let ids = {};
   let index = 1;
@@ -155,10 +167,14 @@ async function getTopArtistsShort(term) {
 }
 async function getTopTracksShort(term) {
   console.log('getting top tracks...');
-  const trackData = await spotifyApi.getMyTopTracks({
-    time_range: term,
-    limit: 5
-  });
+  const trackData = await spotifyApi
+    .getMyTopTracks({
+      time_range: term,
+      limit: 50
+    })
+    .catch((error) => {
+      console.log('error getting top tracks', error);
+    });
 
   let ids = {};
   let index = 1;
