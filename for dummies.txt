@@ -1,3 +1,5 @@
+SET CLIENT_ID in .env
+
 example of data response from spotifyApi.authorizationCodeGrant(code):
 {
   body: {
@@ -26,3 +28,8 @@ example of data response from spotifyApi.authorizationCodeGrant(code):
   },
   statusCode: 200
 }
+
+
+yoooooooo
+you only need to run the token function once
+find a way to find if the user is logged in (check if accessToken is set?)
