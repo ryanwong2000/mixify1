@@ -143,9 +143,9 @@ async function getAuth(req, res, next) {
 }
 async function getMe() {}
 async function getTop(type, term) {
-  console.log(`getting top ${type}...`);
   let topData;
   if (type === 'artists') {
+    console.log('getting top artists');
     topData = await spotifyApi
       .getMyTopArtists({
         time_range: term,
@@ -155,8 +155,9 @@ async function getTop(type, term) {
         console.log('error getting top artists', error);
       });
   } else if (type === 'tracks') {
+    console.log('getting top tracks');
     topData = await spotifyApi
-      .getMyTopArtists({
+      .getMyTopTracks({
         time_range: term,
         limit: 50
       })
