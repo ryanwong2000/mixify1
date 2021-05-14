@@ -30,8 +30,9 @@ const app = express();
 const port = process.env.PORT || 8888;
 console.log('you looking for a boyfriend?');
 var uri;
-console.log('env = ' + process.env.PORT);
-if (process.env.PORT === undefined) {
+if (process.env.PORT === 'undefined') {
+  console.log('env = ' + process.env.PORT);
+
   uri = 'http://localhost:8888/callback';
 } else {
   uri = 'https://mixify1.herokuapp.com/callback';
@@ -45,7 +46,7 @@ app.use(express.json());
 
 const spotifyApi = new SpotifyWebApi({
   redirectUri: uri,
-  clientId: '92fef82c4b9f4b3ca1b3eb08b0001568',
+  clientId: process.env.CLIENT_ID, //92fef82c4b9f4b3ca1b3eb08b0001568
   clientSecret: process.env.CLIENT_SECRET
 });
 
