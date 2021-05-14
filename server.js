@@ -30,19 +30,16 @@ const app = express();
 const port = process.env.PORT || 8888;
 console.log('you looking for a boyfriend?');
 var uri;
-if (process.env.PORT === 'undefined') {
-  console.log('env = ' + process.env.PORT);
-
+if (process.env.PORT === undefined) {
   uri = 'http://localhost:8888/callback';
 } else {
   uri = 'https://mixify1.herokuapp.com/callback';
 }
 app.listen(port, () =>
-  console.log(`HTTP Server up. Now go to ${uri} in your browser.`)
+  console.log(`HTTP Server up. Now go to ${port} in your browser.`)
 );
 //serve static pages in public folder
 app.use(express.static('public'));
-app.use(express.json());
 
 const spotifyApi = new SpotifyWebApi({
   redirectUri: uri,
@@ -61,9 +58,35 @@ app.get('/login', (req, res) => {
 console.log('I see that');
 
 //AUTH STUFF
-app.get('/callback', async (req, res) => {
-  console.log(req);
-  console.log(req.query);
+app.get('/callback', getAuth, (req, res) => {
+  getTopArtistsShort('short_term');
+  getTopTracksShort('short_term');
+
+  // SET TO UPDATE EVERY MONDAY AT 12:12PM
+  try {
+    cron.schedule('12 12 * * mon', () => {
+      getTopArtistsShort('short_term'), { timezone: 'America/New_York' };
+    });
+  } catch (error) {
+    console.error('Error getting top artists', error);
+  }
+  try {
+    cron.schedule('12 12 * * mon', () => {
+      getTopTracksShort('short_term'), { timezone: 'America/New_York' };
+    });
+  } catch (error) {
+    console.error('Error getting top tracks', error);
+  }
+
+  res.redirect('/');
+});
+
+async function getAuth(req, res, next) {
+  if (spotifyApi.getAccessToken()) {
+    console.log('access token is available already');
+    next();
+    return;
+  }
 
   //rewrite w async/await bc i like it better
   const error = req.query.error;
@@ -105,34 +128,14 @@ app.get('/callback', async (req, res) => {
       spotifyApi.setAccessToken(access_token);
     }, (expires_in / 2) * 1000);
 
+    next();
+
     // res.redirect("/top"); //back to index.html
   } catch (error) {
     console.error('Error getting Tokens:', error);
     res.send(`Error getting Tokens: ${error}`);
   }
-
-  // getTopArtistsShort('short_term');
-  // getTopTracksShort('short_term');
-
-  //SET TO UPDATE EVERY MONDAY AT 12:12PM
-  // try {
-  //   cron.schedule('12 12 * * mon', () => {
-  //     getTopArtistsShort('short_term'), { timezone: 'America/New_York' };
-  //   });
-  // } catch (error) {
-  //   console.error('Error getting top artists', error);
-  // }
-  // try {
-  //   cron.schedule('12 12 * * mon', () => {
-  //     getTopTracksShort('short_term'), { timezone: 'America/New_York' };
-  //   });
-  // } catch (error) {
-  //   console.error('Error getting top tracks', error);
-  // }
-
-  res.redirect('/login');
-});
-
+}
 async function getTopArtistsShort(term) {
   console.log('getting top artists...');
   const artistData = await spotifyApi
