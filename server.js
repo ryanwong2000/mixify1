@@ -15,6 +15,7 @@ if (process.env.PORT === undefined) {
   uri = 'https://mixify1.herokuapp.com/callback';
 }
 
+var currentUser = {};
 const spotifyApi = new SpotifyWebApi({
   redirectUri: uri,
   clientId: process.env.CLIENT_ID, //92fef82c4b9f4b3ca1b3eb08b0001568
@@ -116,6 +117,12 @@ app.get(
       res.send(`Error getting Tokens: ${error}`);
     }
   },
+  async (req, res, next) => {
+    const me = await spotifyApi.getMe();
+    currentUser.id = me.body.id;
+    currentUser.uri = me.body.uri;
+    next();
+  },
   (req, res) => {
     // SET TO UPDATE EVERY MONDAY AT 12:12PM
     try {
@@ -195,6 +202,7 @@ async function getTop(type, term) {
 
   //create obj to add to database
   let toStore = {
+    user: currentUser,
     type: type,
     date: topData.headers.date,
     items: ids
