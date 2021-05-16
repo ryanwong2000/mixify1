@@ -145,37 +145,39 @@ app.get('/credentials', (req, res) => {
   }
 });
 app.get('/top', (req, res) => {
+  if (!spotifyApi.getAccessToken()) {
+    res.send('please login first');
+    return;
+  }
   getTop('artists', 'short_term');
   getTop('tracks', 'short_term');
   res.redirect('/');
 });
-
+app.get('/getme', async () => {
+  const me = await spotifyApi.getMe();
+  console.log(me);
+});
 async function getMe() {}
 
 async function getTop(type, term) {
-  let topData;
-  if (type === 'artists') {
-    console.log('getting top artists');
-    topData = await spotifyApi
-      .getMyTopArtists({
-        time_range: term,
-        limit: 50
-      })
-      .catch((error) => {
-        console.log('error getting top artists', error);
-      });
-  } else if (type === 'tracks') {
-    console.log('getting top tracks');
-    topData = await spotifyApi
-      .getMyTopTracks({
-        time_range: term,
-        limit: 50
-      })
-      .catch((error) => {
-        console.log('error getting top artists', error);
-      });
-  } else {
-    console.log('wrong type specified');
+  let topData = {};
+  const options = {
+    time_range: term,
+    limit: 50
+  };
+  try {
+    if (type === 'artists') {
+      console.log('getting top artists');
+      topData = await spotifyApi.getMyTopArtists(options);
+    } else if (type === 'tracks') {
+      console.log('getting top tracks');
+      topData = await spotifyApi.getMyTopTracks(options);
+    } else {
+      console.log('ERROR: wrong type specified');
+      return;
+    }
+  } catch (error) {
+    console.error(`Error getting ${type}`, error);
     return;
   }
 
@@ -194,10 +196,7 @@ async function getTop(type, term) {
   //create obj to add to database
   let toStore = {
     type: type,
-    date: new Date().toLocaleString('en-US', {
-      timeZone: 'America/New_York'
-    }),
-
+    date: topData.headers.date,
     items: ids
   };
   // console.log(toStore);
