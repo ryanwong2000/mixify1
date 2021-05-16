@@ -55,93 +55,103 @@ app.get('/login', (req, res) => {
   res.redirect(spotifyApi.createAuthorizeURL(scopes)); // goes to /callback
 });
 
-app.get('/callback', getAuth, (req, res) => {
-  // SET TO UPDATE EVERY MONDAY AT 12:12PM
-  try {
-    cron.schedule('12 12 * * mon', () => {
-      getTop('artists', 'short_term'), { timezone: 'America/New_York' };
-    });
-  } catch (error) {
-    console.error('Error getting top artists', error);
-  }
-  try {
-    cron.schedule('12 12 * * mon', () => {
-      getTop('tracks', 'short_term'), { timezone: 'America/New_York' };
-    });
-  } catch (error) {
-    console.error('Error getting top tracks', error);
-  }
+app.get(
+  '/callback',
+  async (req, res, next) => {
+    //*******AUTH STUFF***********
+    //check if client already has a token so we don't have to request a grant again.
+    if (spotifyApi.getAccessToken()) {
+      console.log('access token is available already');
+      next();
+      return;
+    }
 
-  res.redirect('/');
+    //rewrite w async/await bc i like it better
+    const error = req.query.error;
+    const code = req.query.code;
+    const state = req.query.state;
+
+    if (error) {
+      console.error('Callback Error:', error);
+      res.send(`Callback Error: ${error}`);
+      return;
+    }
+
+    try {
+      const data = await spotifyApi.authorizationCodeGrant(code);
+
+      const access_token = data.body['access_token'];
+      const refresh_token = data.body['refresh_token'];
+      const expires_in = data.body['expires_in'];
+
+      //STORE ACCESS TOKENS IN CLIENT
+      spotifyApi.setAccessToken(access_token);
+      spotifyApi.setRefreshToken(refresh_token);
+
+      console.log('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++');
+      console.log('access_token:', access_token);
+      console.log('refresh_token:', refresh_token);
+
+      console.log(
+        `Sucessfully retreived access token. Expires in ${expires_in} s.`
+      );
+      console.log('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++');
+      // res.send('Success! You can now close the window.');
+
+      //refresh token every half <expires_in>
+      setInterval(async () => {
+        const data = await spotifyApi.refreshAccessToken();
+        const access_token = data.body['access_token'];
+
+        console.log('The access token has been refreshed!');
+        console.log('access_token:', access_token);
+        spotifyApi.setAccessToken(access_token);
+      }, (expires_in / 2) * 1000);
+
+      next();
+
+      // res.redirect("/top"); //back to index.html
+    } catch (error) {
+      console.error('Error getting Tokens:', error);
+      res.send(`Error getting Tokens: ${error}`);
+    }
+  },
+  (req, res) => {
+    // SET TO UPDATE EVERY MONDAY AT 12:12PM
+    try {
+      cron.schedule('12 12 * * mon', () => {
+        getTop('artists', 'short_term'), { timezone: 'America/New_York' };
+      });
+    } catch (error) {
+      console.error('Error getting top artists', error);
+    }
+    try {
+      cron.schedule('12 12 * * mon', () => {
+        getTop('tracks', 'short_term'), { timezone: 'America/New_York' };
+      });
+    } catch (error) {
+      console.error('Error getting top tracks', error);
+    }
+
+    res.redirect('/');
+  }
+);
+app.get('/credentials', (req, res) => {
+  if (!spotifyApi.getAccessToken()) {
+    res.send('please login first');
+  } else {
+    console.log(spotifyApi.getCredentials());
+    res.redirect('/');
+  }
 });
-app.get('/credentials', getAuth, () => {
-  console.log(spotifyApi.getCredentials());
-});
-app.get('/top', getAuth, () => {
+app.get('/top', (req, res) => {
   getTop('artists', 'short_term');
   getTop('tracks', 'short_term');
+  res.redirect('/');
 });
 
-//AUTH STUFF
-async function getAuth(req, res, next) {
-  //check if client already has a token so we don't have to request a grant again.
-  if (spotifyApi.getAccessToken()) {
-    console.log('access token is available already');
-    next();
-    return;
-  }
-
-  //rewrite w async/await bc i like it better
-  const error = req.query.error;
-  const code = req.query.code;
-  const state = req.query.state;
-
-  if (error) {
-    console.error('Callback Error:', error);
-    res.send(`Callback Error: ${error}`);
-    return;
-  }
-
-  try {
-    const data = await spotifyApi.authorizationCodeGrant(code);
-
-    const access_token = data.body['access_token'];
-    const refresh_token = data.body['refresh_token'];
-    const expires_in = data.body['expires_in'];
-
-    //STORE ACCESS TOKENS IN CLIENT
-    spotifyApi.setAccessToken(access_token);
-    spotifyApi.setRefreshToken(refresh_token);
-
-    console.log('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++');
-    console.log('access_token:', access_token);
-    console.log('refresh_token:', refresh_token);
-
-    console.log(
-      `Sucessfully retreived access token. Expires in ${expires_in} s.`
-    );
-    console.log('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++');
-    // res.send('Success! You can now close the window.');
-
-    //refresh token every half <expires_in>
-    setInterval(async () => {
-      const data = await spotifyApi.refreshAccessToken();
-      const access_token = data.body['access_token'];
-
-      console.log('The access token has been refreshed!');
-      console.log('access_token:', access_token);
-      spotifyApi.setAccessToken(access_token);
-    }, (expires_in / 2) * 1000);
-
-    next();
-
-    // res.redirect("/top"); //back to index.html
-  } catch (error) {
-    console.error('Error getting Tokens:', error);
-    res.send(`Error getting Tokens: ${error}`);
-  }
-}
 async function getMe() {}
+
 async function getTop(type, term) {
   let topData;
   if (type === 'artists') {
